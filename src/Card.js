@@ -12,7 +12,6 @@ class Card extends Component {
       buttonY: null,
       styles: {
         display:"none",
-        background: "red"
       }
     };
   }
@@ -30,7 +29,6 @@ class Card extends Component {
     this.setState({
       open: true,
       styles: {
-        background: "red",
         display: "block"
       }
     });
@@ -70,8 +68,8 @@ class Card extends Component {
       <div className="Context">
         <button ref="button" onClick={(event) => {this.onOpenModal(); this.changeColor(event.target);}}>{this.props.children}</button>
           <div className="modal" style={this.state.styles}>
-            <button type="button" onClick={this.onCloseModal} className="close">&times;</button>
-            <h2>{this.props.modalContent}</h2>
+            <span type="button" onClick={this.onCloseModal} className="close">&times;</span>
+            <div className="modalContent">{this.props.modalContent}</div>
           </div>
 
       </div>
