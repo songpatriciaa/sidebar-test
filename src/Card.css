@@ -1,7 +1,43 @@
+* {
+  box-sizing: border-box;
+}
+
 button {
   float: left;
   margin: 0;
+  font-size: 16px;
+  border-width: 0;
+  padding: 0;
+  display: inline-block;
+  border-color: #FFFF99;
+  background: #FFFF99;
+  margin-bottom: -3px;
 }
-* {
-  box-sizing: border-box;
+
+button:hover{
+  background: #FFDAB9;
+  border-color: #FFDAB9;
+}
+
+button:visited{
+  background: #FFDAB9;
+  border-color: #FFDAB9;
+}
+
+.Context {
+  display: inline-block;
+  padding: 0;
+  margin: 0;
+}
+
+.styles_overlay__CLSq-{
+  /*modal background*/
+  background: none;
+}
+
+.styles_modal__gNwvD{
+  /*modal*/
+  margin-right: 1em;
+  width: 250px;
+  padding: 5px;
 }

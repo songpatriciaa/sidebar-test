@@ -1,7 +1,42 @@
+.Container{
+  display: flex;
+  justify-content: space-around;
+  margin-left: 10em;
+  margin-top: 5em;
+  margin-right: 35em;
+  margin-bottom: 5em;
+
+}
+
 p {
   float: left;
   margin: 0;
+  /* margin-left: 5em;
+  padding: 7em; */
+  /* padding-left: 5em;
+  padding-right: em;
+  padding-top: 2em;
+  padding-bottom: 2em; */
+  font-size: 16px;
 }
 * {
   box-sizing: border-box;
 }
+
+@media only screen and (max-width: 450px) and (max-height: 850px){
+  p {
+    margin-right: -10.5em;
+    margin-left: -7em;
+  }
+}
+
+@media only screen and (max-width: 1100px) and (max-height: 1400px){
+  p {
+    margin-right: -10em;
+    margin-left: -2em;
+  }
+}
+
+/* @mixin for-phone-only {
+  @media (max-width: 599px) { margin-left: -7em; margin-right: -10.5em; }
+} */
