@@ -36,8 +36,8 @@ button:visited{
   float:right;
   display: inline-block;
   margin-top: -11px;
-  left: 55em;
-  width: 250px;
+  right: 10%;
+  width: 25%;
   box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
   border-radius: 1em;
   transition: 0.3s;
@@ -51,11 +51,6 @@ button:visited{
   font-size: 13px;
   padding: 0.8em;
 }
-
-/* .modal {
-  display: none;
-  background-color: red;
-} */
 
 .close:hover,
 .close:focus {
