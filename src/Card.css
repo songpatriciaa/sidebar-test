@@ -9,19 +9,19 @@ button {
   border-width: 0;
   padding: 0;
   display: inline-block;
-  border-color: #FFFF99;
-  background: #FFFF99;
+  border-bottom: 2px solid #708090;
   margin-bottom: -3px;
 }
 
 button:hover{
-  background: #FFDAB9;
-  border-color: #FFDAB9;
+  cursor: pointer;
+  border-bottom: 2.5px solid #708090;
 }
 
 button:visited{
-  background: #FFDAB9;
-  border-color: #FFDAB9;
+  cursor: pointer;
+  font-weight: bold;
+  border-bottom: 2px solid #708090;
 }
 
 .Context {
@@ -30,40 +30,77 @@ button:visited{
   margin: 0;
 }
 
-.modal {
-  /*modal*/
-  position: absolute;
-  float:right;
-  display: inline-block;
-  margin-top: -11px;
-  right: 10%;
-  width: 25%;
-  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
-  border-radius: 1em;
-  transition: 0.3s;
-}
-
-.modal:hover {
-  box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
-}
-
-.modalContent {
-  font-size: 13px;
-  padding: 0.8em;
-}
-
-.close:hover,
-.close:focus {
-    color: black;
-    text-decoration: none;
-    cursor: pointer;
-}
-
-.close {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-    margin-right: 0.4em;
-    margin-top: -0.1em;
+@media screen and (min-width: 416px) and (max-width: 1300px) and (max-height: 1400px){
+  .modal {
+    position: absolute;
+    float:right;
+    display: inline-block;
+    margin-top: -11px;
+    right: 10%;
+    width: 25%;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+    border-radius: 1em;
+    transition: 0.3s;
   }
+  .modalContent {
+    font-size: 13px;
+    padding: 0.8em;
+  }
+  .close:hover,
+  .close:focus {
+      color: black;
+      text-decoration: none;
+      cursor: pointer;
+  }
+  .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      margin-right: 0.4em;
+      margin-top: -0.1em;
+    }
+}
+
+
+
+@media screen and (max-width : 415px) and (max-height : 830px){
+  .modal:hover {
+    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+  }
+  .modalContent{
+      background-color: #fefefe;
+      margin: 15% auto; /* 15% from the top and centered */
+      padding: 20px;
+      border: 1px solid #888;
+      width: 80%; /* Could be more or less, depending on screen size */
+  }
+  .modal {
+    display: none; /* Hidden by default */
+      position: fixed; /* Stay in place */
+      z-index: 1; /* Sit on top */
+      left: 0;
+      top: 0;
+      width: 100%; /* Full width */
+      height: 100%; /* Full height */
+      overflow: auto; /* Enable scroll if needed */
+      background-color: rgb(0,0,0); /* Fallback color */
+      background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+  }
+  /* FIX THIS */
+  /* .close:hover,
+  .close:focus {
+      color: black;
+      text-decoration: none;
+      cursor: pointer;
+  }
+  .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      margin-right: 0.4em;
+      margin-top: -0.1em;
+    } */
+
+}
