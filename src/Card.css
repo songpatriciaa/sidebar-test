@@ -11,6 +11,7 @@ button {
   display: inline-block;
   border-bottom: 2px solid #708090;
   margin-bottom: -3px;
+  background-color: transparent;
 }
 
 button:hover{
@@ -30,6 +31,7 @@ button:visited{
   margin: 0;
 }
 
+/* DESKTOP */
 @media screen and (min-width: 416px) and (max-width: 1300px) and (max-height: 1400px){
   .modal {
     position: absolute;
@@ -57,13 +59,21 @@ button:visited{
       float: right;
       font-size: 28px;
       font-weight: bold;
-      margin-right: 0.4em;
-      margin-top: -0.1em;
+      margin-right: 0;
+      margin-top: -0.6em;
     }
 }
 
+h2 {
+    display: block;
+    font-size: 16px;
+    margin: 0;
+    line-height: 140%;
+    font-weight: normal;
+}
 
 
+/* MOBILE */
 @media screen and (max-width : 415px) and (max-height : 830px){
   .modal:hover {
     box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
@@ -72,7 +82,7 @@ button:visited{
       background-color: #fefefe;
       margin: 15% auto; /* 15% from the top and centered */
       padding: 20px;
-      border: 1px solid #888;
+      /* border: 1px solid #888; */
       width: 80%; /* Could be more or less, depending on screen size */
   }
   .modal {
@@ -88,7 +98,7 @@ button:visited{
       background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
   }
   /* FIX THIS */
-  /* .close:hover,
+  .close:hover,
   .close:focus {
       color: black;
       text-decoration: none;
@@ -99,8 +109,8 @@ button:visited{
       float: right;
       font-size: 28px;
       font-weight: bold;
-      margin-right: 0.4em;
-      margin-top: -0.1em;
-    } */
+      margin-right: 0;
+      margin-top: -0.7em;
+    }
 
 }

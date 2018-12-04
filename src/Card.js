@@ -1,22 +1,28 @@
 import React, { Component } from 'react';
 import './Card.css';
+import ReactDOM from 'react-dom';
 
 class Card extends Component {
   constructor(props) {
     super(props);
+    this.setWrapperRef = this.setWrapperRef.bind(this);
+    this.handleClickOutside = this.handleClickOutside.bind(this);
+    this.modalRef = React.createRef();
     this.classes = {
       'mobileModal': true,
       'overlay': true,
       'overlayCenter': true
     }
-    // this.state.text = this.props.text;
     this.state = {
       open: false,
       buttonX: null,
       buttonY: null,
       styles: {
         display:"none",
-      }
+      },
+      labelStyles: {
+        borderBottom: "1.5px solid #708090",
+      },
     };
   }
 
@@ -25,17 +31,31 @@ class Card extends Component {
       buttonX: this.refs.button.left,
       buttonY: this.refs.button.top
     });
-    console.log(this.state.buttonX);
-    console.log(this.state.buttonY);
+    document.addEventListener('mousedown', this.handleClickOutside);
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener('mousedown', this.handleClickOutside);
   }
 
   onOpenModal = () => {
-    this.setState({
-      open: true,
-      styles: {
-        display: "block"
-      }
-    });
+    if (this.state.open === true) {
+      this.setState({
+        open: false,
+        styles: {
+          display: "none"
+        }
+      });
+    }
+    else {
+      this.setState({
+        open: true,
+        styles: {
+          display: "block"
+        }
+      });
+    }
+
   }
 
   onCloseModal = () => {
@@ -59,28 +79,31 @@ class Card extends Component {
       .join(' ');
   }
 
-  // getButtonPos = (button) => {
-  //   this.setState({
-  //     buttonX: button.left,
-  //     buttonY: button.top
-  //   });
-  // }
+  setWrapperRef(node) {
+    this.wrapperRef = node;
+  }
 
-  // () => {this.onOpenModal(); this.changeModalPos.bind(this,"modal1")}
-
-
-  // <Modal style={this.state.styles} ref="modal1" open={this.state.open} onClose={(event) => {this.onCloseModal(event.target)}} center>
-  //   <h2>Simple centered modal</h2>
-  // </Modal>
-
+  handleClickOutside(event) {
+    if (this.wrapperRef && !this.wrapperRef.contains(event.target)) {
+      this.setState({
+        open: false,
+        styles: {
+          display: "none"
+        }
+      });
+    }
+  }
 
   render() {
     return (
       <div className="Context">
         <button ref="button" onClick={(event) => this.onOpenModal()}>{this.props.children}</button>
           <div className="modal" style={this.state.styles}>
-            <span type="button" onClick={this.onCloseModal} className="close">&times;</span>
-              <div className="modalContent">{this.props.modalContent}</div>
+              <div ref={this.setWrapperRef} className="modalContent">
+              <span type="button" onClick={this.onCloseModal} className="close">&times;</span>
+              <h2 style={this.state.labelStyles}>{this.props.children}</h2>
+              {this.props.modalContent}
+              </div>
           </div>
 
       </div>
