@@ -1,6 +1,6 @@
-import React, { Component } from 'react';
-import './Card.css';
-import ReactDOM from 'react-dom';
+import React, { Component } from "react";
+import "./Card.css";
+import ReactDOM from "react-dom";
 
 class Card extends Component {
   constructor(props) {
@@ -9,9 +9,9 @@ class Card extends Component {
     this.handleClickOutside = this.handleClickOutside.bind(this);
     this.modalRef = React.createRef();
     this.classes = {
-      'mobileModal': true,
-      'overlay': true,
-      'overlayCenter': true
+      "mobileModal": true,
+      "overlay": true,
+      "overlayCenter": true
     }
     this.state = {
       open: false,
@@ -23,6 +23,7 @@ class Card extends Component {
       labelStyles: {
         borderBottom: "1.5px solid #708090",
       },
+      cardSiblings: []
     };
   }
 
@@ -31,11 +32,11 @@ class Card extends Component {
       buttonX: this.refs.button.left,
       buttonY: this.refs.button.top
     });
-    document.addEventListener('mousedown', this.handleClickOutside);
+    document.addEventListener("mousedown", this.handleClickOutside);
   }
 
   componentWillUnmount() {
-    document.removeEventListener('mousedown', this.handleClickOutside);
+    document.removeEventListener("mousedown", this.handleClickOutside);
   }
 
   onOpenModal = () => {
@@ -76,7 +77,7 @@ class Card extends Component {
     return Object.entries(classes)
       .filter(([key,value]) => value)
       .map(([key, value]) => key)
-      .join(' ');
+      .join(" ");
   }
 
   setWrapperRef(node) {
@@ -84,13 +85,16 @@ class Card extends Component {
   }
 
   handleClickOutside(event) {
-    if (this.wrapperRef && !this.wrapperRef.contains(event.target)) {
-      this.setState({
-        open: false,
-        styles: {
-          display: "none"
-        }
-      });
+    if (window.matchMedia("(max-width: 415px)").matches) {
+      console.log("this is true");
+      if (this.wrapperRef && !this.wrapperRef.contains(event.target)) {
+        this.setState({
+          open: false,
+          styles: {
+            display: "none"
+          }
+        });
+      }
     }
   }
 

@@ -4,10 +4,53 @@ import Card from './Card';
 // import { Text } from '../node_modules/react-native';
 
 class App extends Component {
+  constructor(props) {
+    super(props);
+    this.move = this.move.bind(this);
+    this.state = {
+      cardSiblings: []
+    }
+  }
+
+  componentDidMount() {
+    // Make groups first
+    var m = document.getElementsByClassName("Context");
+    var allSiblings = [];
+    var findSiblings = [];
+    findSiblings.push(m[0]);
+    for (var i=0; i<m.length; i++) {
+      if (i < m.length-1) {
+        if ((m[i+1].getBoundingClientRect().top - m[i].getBoundingClientRect().bottom <= 200) || (m[i].top - m[i+1].bottom <= 200)) {
+          findSiblings.push(m[i+1])
+        }
+        else {
+          allSiblings.push(findSiblings);
+          findSiblings = [m[i+1]];
+        }
+      }
+    }
+    console.log("printing allSiblings...");
+    console.log(allSiblings);
+    this.setState({
+      cardSiblings: allSiblings
+    });
+
+    // From Content divs, get their children, which contains the modals
+
+    this.move.addEventListener("click", (ele) => {
+      // Rearrange modals
+      return null;
+    });
+  }
+
+  move(node) {
+    this.move = node;
+  }
+
   render() {
     return (
       <div className="App">
-        <div className="Container">
+        <div ref={this.move} className="Container">
           <p>
           By Sidebar Team
           <br></br>
