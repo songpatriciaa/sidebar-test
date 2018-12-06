@@ -8,62 +8,146 @@ class App extends Component {
     super(props);
     this.move = this.move.bind(this);
     this.state = {
-      cardSiblings: {}, // {card: group#}
-      openCards: [], // dictionary of groups and open cards {"Group1": [card1]}
-      cardLinks: {"substring": "link"}
+      cardDivs: {}, // {card-button-text: cardDiv}
+      cardSiblings: {}, // {card-button-text: group#}
+      cardGroups: {}, // dictionary of groups and all cards {group#: [card1 - list of divs]}
+      openCards: {} // Use this to check collisions between open groups {group#: [list of divs]}
     }
   }
 
-  componentDidMount() {
+  componentDidMount() { // Issue: all strings within the buttons must be unique
     // Make groups first
     var m = document.getElementsByClassName("Context");
-    var allSiblings = [];
-    var findSiblings = [];
+    var cardSiblings = {};
+    var cardDivs = {};
+    var cardGroups = {};
+    var findSiblings = []; // List of all divs
+    var groupText = []; // List of all strings contained in the buttons
+    var groupNo = 0;
+    var rand = 0;
     findSiblings.push(m[0]);
+    groupText.push(m[0].firstChild.firstChild.data);
+
     for (var i=0; i<m.length; i++) {
+      cardDivs[m[i].firstChild.firstChild.data] = m[i]; // Map text of button to div
       if (i < m.length-1) {
         if ((m[i+1].getBoundingClientRect().top - m[i].getBoundingClientRect().bottom <= 200) || (m[i].top - m[i+1].bottom <= 200)) {
-          findSiblings.push(m[i+1])
+          findSiblings.push(m[i+1]);
+          groupText.push(m[i+1].firstChild.firstChild.data);
         }
         else {
-          allSiblings.push(findSiblings);
-          findSiblings = [m[i+1]];
+          cardGroups[groupNo] = findSiblings;
+          for (var j=0; j<findSiblings.length; j++) {
+            var t = groupText[j];
+            cardSiblings[t] = groupNo;
+          }
+          findSiblings.length = 0;
+          groupText.length = 0;
+          findSiblings.push(m[i+1]);
+          groupText.push(m[i+1].firstChild.firstChild);
+          groupNo++;
         }
       }
     }
-    console.log("printing allSiblings...");
-    console.log(allSiblings);
+    cardGroups[groupNo] = findSiblings;
+    for (var j=0; j<findSiblings.length; j++) { // Get the very last group
+      cardSiblings[groupText[j].data] = groupNo;
+    }
     this.setState({
-      cardSiblings: allSiblings
+      cardDivs: cardDivs,
+      cardSiblings: cardSiblings,
+      cardGroups: cardGroups
     });
+    console.log(cardSiblings);
+    console.log(cardDivs);
+    console.log(cardGroups);
+
 
     // From Content divs, get their children, which contains the modals
 
-    this.move.addEventListener("click", (ele) => {
-      // Rearrange modals
-      const s = this.state.cardSiblings;
-      for (var i=0; i<s.length; i++) {
-        if (s[i].length > 1) {
-          var first = s[0][0].lastChild;
-          console.log(s[0][0].firstChild.offsetHeight);
-          //offsetBottom = offsetTop + offsetBottom
-          //make sure it doesn't keep moving up lol
-          for (var j=1; j<s[i].length; j++) {
-            console.log(s[i][j].lastChild.style.display);
-            if (ele.target === s[i][j].firstChild){
-              if (first.offsetTop > 0) {
-                first.style.top = (Number(first.offsetTop) - 100).toString() + "px";
-                console.log("case 1 runs");
-              }
-            }
-
-            else if ((ele.target === s[0][0].firstChild) && (s[i][j].lastChild.style.display != "none")) {
-              s[i][j].lastChild.style.top = (Number(s[i][j].offsetTop) + 100).toString() + "px";
-              console.log("case 2 runs");
-            }
+    this.move.addEventListener("click", (ele) => { // Also need to close cards
+      if (!ele.target.type) {
+        return;
+      }
+      var groupNo = this.state.cardSiblings[ele.target.firstChild.data];
+      if (this.state.openCards[groupNo]){
+        for (var i=0; i<this.state.openCards[groupNo].length; i++) {
+          if (this.state.cardDivs[ele.target.firstChild.data] === this.state.openCards[groupNo][i]) {
+            this.state.openCards[groupNo].splice(i,1); // Remove from open cards when closing
           }
         }
       }
+      // Rearrange modals
+      const cardGroups = this.state.cardGroups;
+      var openCards = this.state.openCards;
+      // Iterate through cardGroups, check for collisions between siblings
+      // Add open siblings to openCards
+      var first = cardGroups[0][0].firstChild;
+      // Find card target
+      // Find group of card
+      // Check if siblings are open
+      console.log(this.state.cardDivs)
+      var target = ele.target;
+      var getModal = this.state.cardDivs[ele.target.firstChild.data].childNodes[1];
+      console.log(ele.target.firstChild.data);
+      console.log(this.state.cardDivs[ele.target.firstChild.data].childNodes[1].offsetHeight); // Get height of modal div
+
+      // setTimeout(function(){ // Wait to get correct modal height
+      //   console.log(getModal.offsetHeight);
+      // },1);
+      // console.log(setTimeout(this.checkCollision(getModal,getModal,getModal), 1));
+      console.log(this.state.cardSiblings);
+      var targetGroup = this.state.cardSiblings[ele.target.firstChild.data]; // Get group of clicked button
+      console.log(targetGroup);
+      if (targetGroup in openCards) {
+        // Check collisions between open siblings
+        for (var i=0; i < openCards[targetGroup].length; i++) {
+          // console.log("opening for loop");
+          if (ele.target.offsetTop < openCards[targetGroup][i].offsetTop) { // clicked div is on top
+            // Move bottom div
+            console.log("case 1 runs");
+            var move = setTimeout(this.checkCollision(getModal,openCards[targetGroup][i],getModal), 1);
+            console.log(move);
+          }
+          else { // clicked div is on bottom
+            // Check for collision, place it below offsetBottom of top div
+            // Move top div
+            var top = openCards[targetGroup][i];
+            console.log(top);
+            var bottom = getModal;
+            var clicked = getModal;
+            console.log("case 2 runs");
+            setTimeout(this.checkCollision(openCards[targetGroup][i],getModal,getModal),1);
+            // setTimeout(function() {
+            //   console.log(move);
+            //   var top = openCards[targetGroup][i];
+            //   top.lastChild.style.top = (Number(top.offsetTop) - move).toString() + "px";
+            // }, 1);
+          }
+        }
+        openCards[targetGroup].push(this.state.cardDivs[ele.target.firstChild.data]);
+        this.setState({
+          openCards: openCards
+        });
+      }
+      else { // Add in first card
+        var d = {};
+        openCards[targetGroup] = [this.state.cardDivs[ele.target.firstChild.data]];
+        this.setState({
+          openCards: openCards
+        });
+      }
+
+
+      for (var i=0; i<cardGroups.length; i++) {
+        var group = cardGroups[i];
+        for (var j=0; j<group.length; j++) {
+          // Find card target
+          // Check for top and bottom card
+        }
+      }
+      // Iterate through openCards, check for collisions between groups
+      // Pass top-most div of bottom group and bottom-most div of top group into checkCollision
       return null;
     });
   }
@@ -94,20 +178,31 @@ class App extends Component {
   }
 
   checkCollision(top,bottom,clicked) {
-    var top_offsetBottom = top.offsetTop + top.offsetHeight;
-    var move = -1;
-    if (bottom.offsetTop <= top_offsetBottom) {
-      if (clicked === top) { // Move bottom card
-        move = top_offsetBottom + 50;
-      }
-      else { // Move top card
-        if (top.offsetTop > 0) {
-          move = bottom.offsetTop - 50;
+    return setTimeout(function(){
+      var top_offsetBottom = top.offsetTop + top.lastChild.offsetHeight;
+      var move = 0;
+      console.log(clicked);
+      console.log(top);
+      if (bottom.offsetTop <= top_offsetBottom) {
+        if (clicked == top) { // Move bottom card
+          console.log("move bottom?");
+          console.log(top_offsetBottom);
+          move = top_offsetBottom + 20;
+          bottom.lastChild.style.top = move.toString()+"px";
         }
-
+        else { // Move top card
+          if (top.offsetTop > 0) {
+            console.log("move top?");
+            move = top_offsetBottom - bottom.offsetTop;
+            console.log(move);
+            top.lastChild.style.top = (Number(top.offsetTop) - move).toString() + "px";
+          }
+        }
       }
-    }
-    return move;
+
+      return move;
+    },1);
+
   }
 
   render() {
