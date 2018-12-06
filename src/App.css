@@ -2,17 +2,26 @@
   display: flex;
   justify-content: space-around;
   /* margin-left: 10em; */
-  margin-top: 10%;
   /* margin-right: 35em; */
-  margin-bottom: 10%;
+  margin-bottom: 5%;
+}
 
+.headline{
+  font-size: calc(21px + 2.5vw);
+  font-weight: bold;
+  line-height: 1.1em;
+  word-spacing: -0.02em;
+  margin-bottom: 8px;
+  display: inline-block;
 }
 
 p {
+  display: inline-block;
   float: left;
   margin: 0;
   font-size: 16px;
   line-height: 1.6;
+  /* white-space: nowrap; */
 }
 
 #modalContent{
@@ -28,6 +37,9 @@ p {
     margin-right: 2em;
     margin-left: 2em;
   }
+  .Container{
+    margin-top: 10%;
+  }
 }
 
 @-ms-viewport{
@@ -38,5 +50,8 @@ p {
   p {
     margin-right: 40%;
     margin-left: 10%;
+  }
+  .Container{
+    margin-top: 5%;
   }
 }

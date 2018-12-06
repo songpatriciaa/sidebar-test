@@ -22,6 +22,8 @@ class Card extends Component {
       },
       labelStyles: {
         borderBottom: "1.5px solid #708090",
+        marginBottom: "3px",
+        textTransform: "capitalize",
       },
       cardSiblings: []
     };
@@ -106,7 +108,9 @@ class Card extends Component {
               <div ref={this.setWrapperRef} className="modalContent">
               <span type="button" onClick={this.onCloseModal} className="close">&times;</span>
               <h2 style={this.state.labelStyles}>{this.props.children}</h2>
+              {this.props.extraImage}
               {this.props.modalContent}
+              {this.props.extraLink}
               </div>
           </div>
 
