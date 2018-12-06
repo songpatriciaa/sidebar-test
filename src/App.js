@@ -8,15 +8,18 @@ class App extends Component {
     super(props);
     this.move = this.move.bind(this);
     this.state = {
-      cardSiblings: []
+      cardSiblings: {}, // {card: group#}
+      openCards: [] // dictionary of groups and open cards {"Group1": [card1]}
     }
   }
 
   componentDidMount() {
     // Make groups first
     var m = document.getElementsByClassName("Context");
-    var allSiblings = [];
+    var allSiblings = {};
     var findSiblings = [];
+    var groupNo = 1;
+    var rand = 0;
     findSiblings.push(m[0]);
     for (var i=0; i<m.length; i++) {
       if (i < m.length-1) {
@@ -24,12 +27,23 @@ class App extends Component {
           findSiblings.push(m[i+1])
         }
         else {
-          allSiblings.push(findSiblings);
+          // allSiblings.push(findSiblings);
+          console.log(findSiblings);
+          for (var j=0; j<findSiblings.length; j++) {
+            console.log("hi we here");
+            allSiblings[rand] = findSiblings[j];
+            rand++;
+          }
           findSiblings = [m[i+1]];
+          groupNo++;
+          console.log(groupNo);
         }
       }
     }
-    console.log("printing allSiblings...");
+    for (var j=0; j<findSiblings.length; j++) {
+      allSiblings[rand] = findSiblings[j]
+    }
+
     console.log(allSiblings);
     this.setState({
       cardSiblings: allSiblings
@@ -42,22 +56,34 @@ class App extends Component {
       const s = this.state.cardSiblings;
       for (var i=0; i<s.length; i++) {
         if (s[i].length > 1) {
-          var first = s[0][0].lastChild;
-          console.log(s[0][0].firstChild.offsetHeight);
-          //offsetBottom = offsetTop + offsetBottom
-          //make sure it doesn't keep moving up lol
+          var first = s[0][0].lastChild; // Very first card out of all siblings
           for (var j=1; j<s[i].length; j++) {
-            console.log(s[i][j].lastChild.style.display);
-            if (ele.target === s[i][j].firstChild){
+            if (ele.target === s[i][0].firstChild) {
+
+            }
+
+
+
+
+
+            if ((ele.target === s[i][j].firstChild) && (s[i][j].lastChild.style.display === "none")){ // Click on bottom card
+              var offsetBottom = s[i][j].firstChild.offsetTop + s[i][j].firstChild.offsetHeight;
+
+
+
+
+
               if (first.offsetTop > 0) {
                 first.style.top = (Number(first.offsetTop) - 50).toString() + "px";
                 console.log("case 1 runs");
               }
             }
 
-            else if ((ele.target === s[0][0].firstChild) && (s[i][j].lastChild.style.display != "none")) {
-              s[i][j].lastChild.style.top = (Number(s[i][j].offsetTop) + 50).toString() + "px";
-              console.log("case 2 runs");
+            else if (i>0) { // Click on top card
+              if((ele.target === s[i-1][j].firstChild) && (s[i][j].lastChild.style.display != "none")) { // Click on top card
+                s[i][j].lastChild.style.top = (Number(s[i][j].offsetTop) + 50).toString() + "px";
+                console.log("case 2 runs");
+              }
             }
           }
         }
@@ -68,6 +94,23 @@ class App extends Component {
 
   move(node) {
     this.move = node;
+  }
+
+  checkCollision(top,bottom,clicked) {
+    var top_offsetBottom = top.offsetTop + top.offsetHeight;
+    var move = -1;
+    if (bottom.offsetTop <= top_offsetBottom) {
+      if (clicked === top) { // Move bottom card
+        move = top_offsetBottom + 50;
+      }
+      else { // Move top card
+        if (top.offsetTop > 0) {
+          move = bottom.offsetTop - 50;
+        }
+
+      }
+    }
+    return move;
   }
 
   render() {
