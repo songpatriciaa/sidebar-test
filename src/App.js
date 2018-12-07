@@ -8,61 +8,31 @@ class App extends Component {
     super(props);
     this.move = this.move.bind(this);
     this.state = {
-      cardDivs: {}, // {card-button-text: cardDiv}
-      cardSiblings: {}, // {card-button-text: group#}
-      cardGroups: {}, // dictionary of groups and all cards {group#: [card1 - list of divs]}
-      openCards: {} // Use this to check collisions between open groups {group#: [list of divs]}
+      cardDivs: [], // {card-button-text: cardDiv}
+      openCards: [], // Use this to check collisions between open groups {group#: [list of divs]}
+      cardOrder: {}
     }
   }
 
   componentDidMount() { // Issue: all strings within the buttons must be unique
     // Make groups first
     var m = document.getElementsByClassName("Context");
-    console.log(m[0].childNodes[1]);
-    var cardSiblings = {};
-    var cardDivs = {};
-    var cardGroups = {};
-    var findSiblings = []; // List of all divs
-    var groupText = []; // List of all strings contained in the buttons
-    var groupNo = 0;
-    var rand = 0;
-    findSiblings.push(m[0]);
-    groupText.push(m[0].firstChild.firstChild.data);
+    var cardDivs = [];
+    var cardOrder = {};
+    var count = 0;
 
     for (var i=0; i<m.length; i++) {
-      cardDivs[m[i].firstChild.firstChild.data] = m[i]; // Map text of button to div
-      if (i < m.length-1) {
-        if ((m[i+1].getBoundingClientRect().top - m[i].getBoundingClientRect().bottom <= 200) || (m[i].top - m[i+1].bottom <= 200)) {
-          findSiblings.push(m[i+1]);
-          groupText.push(m[i+1].firstChild.firstChild.data);
-        }
-        else {
-          cardGroups[groupNo] = findSiblings;
-          for (var j=0; j<findSiblings.length; j++) {
-            var t = groupText[j];
-            cardSiblings[t] = groupNo;
-          }
-          findSiblings.length = 0;
-          groupText.length = 0;
-          findSiblings.push(m[i+1]);
-          groupText.push(m[i+1].firstChild.firstChild);
-          groupNo++;
-        }
-      }
-    }
-    cardGroups[groupNo] = findSiblings;
-    for (var j=0; j<findSiblings.length; j++) { // Get the very last group
-      cardSiblings[groupText[j].data] = groupNo;
+      cardDivs.push(m[i]); // Just push cardDiv
+      cardOrder[m[i].firstChild.firstChild.data] = count;
+      // cardOrder[count] = m[i];
+      count++;
     }
     this.setState({
       cardDivs: cardDivs,
-      cardSiblings: cardSiblings,
-      cardGroups: cardGroups
+      cardOrder: cardOrder
     });
-    console.log(cardSiblings);
     console.log(cardDivs);
-    console.log(cardGroups);
-
+    console.log(cardOrder);
 
     // From Content divs, get their children, which contains the modals
 
@@ -70,86 +40,36 @@ class App extends Component {
       if (!ele.target.type) {
         return;
       }
-      var groupNo = this.state.cardSiblings[ele.target.firstChild.data];
-      if (this.state.openCards[groupNo]){
-        for (var i=0; i<this.state.openCards[groupNo].length; i++) {
-          if (this.state.cardDivs[ele.target.firstChild.data] === this.state.openCards[groupNo][i]) {
-            this.state.openCards[groupNo].splice(i,1); // Remove from open cards when closing
+      for (var i=0; i<this.state.openCards.length; i++) { // If we're closing the card, remove it from openCards
+        if (ele.target === this.state.openCards[i].firstChild) {
+          var openCards = this.state.openCards.splice(i,1);
+          this.setState({
+            openCards: openCards
+          });
+        }
+      }
+
+      for (var i=0; i<this.state.cardDivs.length; i++) {
+        if (ele.target === this.state.cardDivs[i].firstChild) {
+          this.state.openCards.push(this.state.cardDivs[i]);
+        }
+      }
+
+      for (var i=0; i<this.state.openCards.length; i++) {
+        for (var j=0; j<this.state.openCards.length; j++) {
+          if (this.state.openCards[i] === this.state.openCards[j]){
+            continue;
+          }
+          var clickNum = cardOrder[this.state.openCards[i].firstChild.firstChild.data];
+          var compareNum = cardOrder[this.state.openCards[j].firstChild.firstChild.data];
+          if (clickNum > compareNum) { // clickNum comes after compareNum
+            setTimeout(this.checkCollision(this.state.openCards[j].childNodes[1],this.state.openCards[i].childNodes[1], true), 1);
+          }
+          else { // clickNum < compareNum
+            setTimeout(this.checkCollision(this.state.openCards[i].childNodes[1],this.state.openCards[j].childNodes[1], false), 1);
           }
         }
       }
-      // Rearrange modals
-      const cardGroups = this.state.cardGroups;
-      var openCards = this.state.openCards;
-      // Iterate through cardGroups, check for collisions between siblings
-      // Add open siblings to openCards
-      var first = cardGroups[0][0].firstChild;
-      // Find card target
-      // Find group of card
-      // Check if siblings are open
-      console.log(this.state.cardDivs)
-      var target = ele.target;
-      var getModal = this.state.cardDivs[ele.target.firstChild.data].childNodes[1];
-      console.log(ele.target.firstChild.data);
-      console.log(this.state.cardDivs[ele.target.firstChild.data].childNodes[1].offsetHeight); // Get height of modal div
-
-      // setTimeout(function(){ // Wait to get correct modal height
-      //   console.log(getModal.offsetHeight);
-      // },1);
-      // console.log(setTimeout(this.checkCollision(getModal,getModal,getModal), 1));
-      console.log(this.state.cardSiblings);
-      var targetGroup = this.state.cardSiblings[ele.target.firstChild.data]; // Get group of clicked button
-      console.log(targetGroup);
-      if (targetGroup in openCards) {
-        // Check collisions between open siblings
-        for (var i=0; i < openCards[targetGroup].length; i++) {
-          // console.log("opening for loop");
-          if (ele.target.offsetTop < openCards[targetGroup][i].offsetTop) { // clicked div is on top
-            // Move bottom div
-            console.log("case 1 runs");
-            var move = setTimeout(this.checkCollision(getModal,openCards[targetGroup][i],getModal), 1);
-            console.log(move);
-          }
-          else { // clicked div is on bottom
-            // Check for collision, place it below offsetBottom of top div
-            // Move top div
-            var top = openCards[targetGroup][i];
-            console.log(top);
-            var bottom = getModal;
-            var clicked = getModal;
-            console.log("case 2 runs");
-            setTimeout(this.checkCollision(openCards[targetGroup][i],getModal,getModal),1);
-            // setTimeout(function() {
-            //   console.log(move);
-            //   var top = openCards[targetGroup][i];
-            //   top.lastChild.style.top = (Number(top.offsetTop) - move).toString() + "px";
-            // }, 1);
-          }
-        }
-        openCards[targetGroup].push(this.state.cardDivs[ele.target.firstChild.data]);
-        this.setState({
-          openCards: openCards
-        });
-      }
-      else { // Add in first card
-        var d = {};
-        openCards[targetGroup] = [this.state.cardDivs[ele.target.firstChild.data]];
-        this.setState({
-          openCards: openCards
-        });
-      }
-
-
-      for (var i=0; i<cardGroups.length; i++) {
-        var group = cardGroups[i];
-        for (var j=0; j<group.length; j++) {
-          // Find card target
-          // Check for top and bottom card
-        }
-      }
-      // Iterate through openCards, check for collisions between groups
-      // Pass top-most div of bottom group and bottom-most div of top group into checkCollision
-      return null;
     });
   }
 
@@ -178,25 +98,24 @@ class App extends Component {
     );
   }
 
-  checkCollision(top,bottom,clicked) {
+  checkCollision(one, two, bool) {
     return setTimeout(function(){
-      var top_offsetBottom = top.offsetTop + top.lastChild.offsetHeight;
+      var one_offsetBottom = one.offsetTop + one.lastChild.offsetHeight;
       var move = 0;
-      console.log(clicked);
-      console.log(top);
-      if (bottom.offsetTop <= top_offsetBottom) {
-        if (clicked == top) { // Move bottom card
-          console.log("move bottom?");
-          console.log(top_offsetBottom);
-          move = top_offsetBottom + 20;
-          bottom.lastChild.style.top = move.toString()+"px";
+      console.log(one);
+      console.log(two);
+      // console.log(clicked);
+      if (two.offsetTop <= one_offsetBottom) {
+        if (bool === true) { // Move bottom card
+          console.log("move two?");
+          move = one_offsetBottom + 10;
+          two.style.top = move.toString()+"px";
         }
         else { // Move top card
-          if (top.offsetTop > 0) {
-            console.log("move top?");
-            move = top_offsetBottom - bottom.offsetTop;
-            console.log(move);
-            top.lastChild.style.top = (Number(top.offsetTop) - move).toString() + "px";
+          if (bool === false) {
+            console.log("move one?");
+            move = one_offsetBottom - two.offsetTop;
+            one.style.top = (Number(one.offsetTop) - move).toString() + "px";
           }
         }
       }
@@ -216,9 +135,9 @@ class App extends Component {
           <br></br><br></br>
           Vicky Warren feels like she’s been attacked from all sides lately. Across the street from her rental apartment in the working-class Los Angeles County <Card extraImage={this.insertImage("https://img.bestplaces.net/compare-cities/0632548_CA_Hawthorne.png","Map of Hawthorne")} modalContent="Hawthorne is a Los Angeles County city. Hawthorne has a population of nearly 87,000 within a six square mile area. It is located roughly 5 miles from the Los Angeles International Airport." extraLink={this.hyperlinkify("http://www.cityofhawthorne.org/about-hawthorne/&sa=D&ust=1544075782455000&usg=AFQjCNFAkbA667IaYlaUnl6xjBYDr4M65g")}>city of Hawthorne</Card>, noisy planes take off and land at all hours, diverted to the local municipal airport from wealthier Santa Monica, where neighbor complaints have restricted air traffic. On the other side of her apartment, cars on the 105 Freeway sound the frustration of L.A. traffic. She’s even getting assailed within her walls: Termites have invaded so completely that she can’t keep any food uncovered. Flea bites cover her legs; rats are aggressively attacking the boxes she has stored in her garage.
           <br></br><br></br>
-          So Warren was disappointed, but not surprised, to learn that invaders are coming from underground, too. She lives on 120th Street, where 40 feet underground <Card modalContent="Elon Musk is a South African born entrepreneur. Musk is the CEO of Tesla, Neuralink, SpaceX and The Boring Company. He became a billionaire when he sold his company PayPal in 2002.">Elon Musk</Card>’s <Card modalContent="The Boring Company is a tunnel construction company founded by Elon Musk in 2016. The goal of the company is to reduce congestion in cities, through creating fast to dig, low cost tunnels that would enable rapid transit across densely populated regions." extraLink={this.hyperlinkify("https://www.boringcompany.com/faq/&sa=D&ust=1544075782444000&usg=AFQjCNEo1x3B20_Q1YOMt7ExiZnDUsZFvQ")}>Boring Company</Card> is building a 14-foot-wide, <Card extraImage={this.insertImage("http://la.streetsblog.org/wp-content/uploads/sites/2/2018/04/BoringTunnelconceptmap.jpg", "Concept Map of Transit System")} modalContent="In 2017, The Boring Co concept map showed a 6.5-mile proof-of-concept tunnel extending from Westwood to near Inglewood. With a 14-foot wide tunnel extending 2.7 miles, the project footprint (not counting on-ramps, staging areas) would measure 4.58 acres." extraLink={this.hyperlinkify("https://la.streetsblog.org/2018/04/16/elon-musk-boring-company-test-tunnel-could-get-fast-tracked-blocking-metros-sepulveda-rail-project/&sa=D&ust=1544075782451000&usg=AFQjCNH00mpeTQIYVyWhdtgKK4Twuhtkiw")}>mile-long tunnel</Card> to pilot a futuristic transit system untested anywhere in the world. When it’s finished in December, the tunnel will start at the nearby headquarters of <Card modalContent="SpaceX designs, manufactures and launches advanced rockets and spacecraft. The private company was founded in 2002 by Elon Musk to revolutionize space technology, with the ultimate goal of enabling people to live on other planets." extraLink={this.hyperlinkify("https://www.spacex.com/about&sa=D&ust=1544075782442000&usg=AFQjCNHpYakQMV0CH4RhQMae16GOr6fquQ")}>SpaceX</Card>, Musk’s aerospace company, and end a few blocks past Warren’s apartment. “We’re just sandwiched in between so much already,” Warren told me, shaking her head.
+          So Warren was disappointed, but not surprised, to learn that invaders are coming from underground, too. She lives on 120th Street, where 40 feet underground Elon Musk’s Boring Company is building a 14-foot-wide, <Card extraImage={this.insertImage("http://la.streetsblog.org/wp-content/uploads/sites/2/2018/04/BoringTunnelconceptmap.jpg", "Concept Map of Transit System")} modalContent="In 2017, The Boring Co concept map showed a 6.5-mile proof-of-concept tunnel extending from Westwood to near Inglewood. With a 14-foot wide tunnel extending 2.7 miles, the project footprint (not counting on-ramps, staging areas) would measure 4.58 acres." extraLink={this.hyperlinkify("https://la.streetsblog.org/2018/04/16/elon-musk-boring-company-test-tunnel-could-get-fast-tracked-blocking-metros-sepulveda-rail-project/&sa=D&ust=1544075782451000&usg=AFQjCNH00mpeTQIYVyWhdtgKK4Twuhtkiw")}>mile-long tunnel</Card> to pilot a futuristic transit system untested anywhere in the world. When it’s finished in December, the tunnel will start at the nearby headquarters of SpaceX, Musk’s aerospace company, and end a few blocks past Warren’s apartment. “We’re just sandwiched in between so much already,” Warren told me, shaking her head.
           <br></br><br></br>
-          Musk sees the future of American transportation in tunnels like this one. Inside them, electric skates would whisk cars and pods containing passengers to their destinations; eventually, tunnels could also be used for a “<a href="https://www.spacex.com/hyperloop">hyperloop</a>,” which would transport people even faster through a network of low-pressure tubes. Musk <a href="https://www.wired.com/story/engineers-dont-totally-dig-musk-tunneling/">has pledged</a> to revolutionize tunneling technology, and says that digging 40 feet underground will make less noise than someone walking on the surface would. Musk fans and <Card modalContent="Chicago Mayor Rahm Emanuel and Elon Musk met in June of 2018 at the CTA to announce plans for an express connection between O'Hare International Airport and downtown Chicago. Emanuel called Elon Musk's proposed 12-minute express tunnel to O'Hare 'the fast lane to Chicago's future'." extraLink={this.hyperlinkify("https://www.chicagotribune.com/news/local/politics/ct-met-ohare-high-speed-transit-elon-musk-rahm-emanuel-20180614-story.html&sa=D&ust=1544075782473000&usg=AFQjCNE7B3QsjBuKfoW-0oDDHvgKCuJXOA")}>mayors love the idea</Card>—the Boring Company told me a new city makes contact daily—and municipalities like Hawthorne have been quick to approve the tunneling. But above ground, <a href="https://www.census.gov/quickfacts/fact/table/hawthornecitycalifornia/PST045217">where</a> the poverty rate is 19.2 percent and the median household income is $45,089, people like Warren struggle to meet basic housing needs. They know nothing about Elon Musk or his dreams.
+          Musk sees the future of American transportation in tunnels like this one. Inside them, electric skates would whisk cars and pods containing passengers to their destinations; eventually, tunnels could also be used for a “<a href="https://www.spacex.com/hyperloop">hyperloop</a>,” which would transport people even faster through a network of low-pressure tubes. Musk <a href="https://www.wired.com/story/engineers-dont-totally-dig-musk-tunneling/">has pledged</a> to revolutionize tunneling technology, and says that digging 40 feet underground will make less noise than someone walking on the surface would. Musk fans and mayors love the idea—the Boring Company told me a new city makes contact daily—and municipalities like Hawthorne have been quick to approve the tunneling. But above ground, <a href="https://www.census.gov/quickfacts/fact/table/hawthornecitycalifornia/PST045217">where</a> the poverty rate is 19.2 percent and the median household income is $45,089, people like Warren struggle to meet basic housing needs. They know nothing about Elon Musk or his dreams.
           <br></br><br></br>
           Even if Musk is building world-changing transportation underneath Hawthorne, and even if the residents ultimately welcome the technology, he is undertaking this project with strikingly little public input or oversight.
           <br></br><br></br>
@@ -239,7 +158,7 @@ class App extends Component {
           <br></br><br></br>
           The residents are right: It might have been hard to stand in the way of what many places see as progress. Musk’s plans have cities across the country salivating. He says he’s gotten verbal permission to build a hyperloop between New York and Washington D.C., and he joined Chicago Mayor <Card modalContent="Rahm Israel Emanuel is the 46th and first Jewish Mayor of Chicago. He was elected in 2011 and re-elected for a second term as Mayor of Chicago in 2015." extraLink={this.hyperlinkify("https://www.cnn.com/2013/02/13/us/rahm-emanuel-fast-facts/index.html&sa=D&ust=1544075782458000&usg=AFQjCNEzUJ0WEeANGGEbsT-3YS3Wi0QKGg")}>Rahm Emanuel</Card> in June to announce plans for an <Card extraImage={this.insertImage("https://c-7npsfqifvt34x24x78x78x78x2euscjnhx2edpn.g00.chicagotribune.com/g00/3_c-7x78x78x78.dijdbhpusjcvof.dpn_/c-7NPSFQIFVT34x24iuuqx3ax2fx2fx78x78x78.uscjnh.dpnx2fjnh-6c33dg36x2fuvscjofx2fdu-nfu-pibsf-usbotju-fmpo-nvtl-nbq-hgy-31291725x2f861x2f861y533x3fj21d.nbslx3djnbhf_$/$/$/$/$/$", "Map")} modalContent="Map of Underground Transit System" extraLink={this.hyperlinkify("https://www.chicagotribune.com/news/data/ct-met-ohare-transit-elon-musk-map-gfx-20180614-graphic.html&sa=D&ust=1544075782480000&usg=AFQjCNH53vL8qtutL8KHGq3UwsE_ta1AqA")}>underground transit system</Card> between Chicago and O’Hare International Airport.
           <br></br><br></br>
-          Hawthorne seems particularly eager to make sure that Musk and the Boring Company keep their transportation research in the city, and not elsewhere. “We want this to be an awesome project that’s going to propel us into the future and determine what the future of transportation is,” Hawthorne Mayor <Card modalContent="Alex Vargas is the Hawthorne Mayor. He was elected in 2015 after serving on the Hawthorne City Council for 6 years.">Alex Vargas</Card> said during the 2017 meeting when the digging was approved. Mike Talleda, the chairperson of the Hawthorne planning commission, reminded his colleagues during a 2018 meeting that although the project seemed a little “James Bond,” the people who work at the Boring Company “are pretty high-tech, qualified engineers” and they could be trusted to dig a tunnel right. “Someday we might be able to say, ‘Hey, this new system began in our little neighborhood right under my house,’” Talleda said. When one member moved to amend the zoning code so that the Boring Company could build the elevator, two others stumbled over each other in their rush to second him. It passed 5–0.
+          Hawthorne seems particularly eager to make sure that Musk and the Boring Company keep their transportation research in the city, and not elsewhere. “We want this to be an awesome project that’s going to propel us into the future and determine what the future of transportation is,” Hawthorne Mayor Alex Vargas said during the 2017 meeting when the digging was approved. Mike Talleda, the chairperson of the Hawthorne planning commission, reminded his colleagues during a 2018 meeting that although the project seemed a little “James Bond,” the people who work at the Boring Company “are pretty high-tech, qualified engineers” and they could be trusted to dig a tunnel right. “Someday we might be able to say, ‘Hey, this new system began in our little neighborhood right under my house,’” Talleda said. When one member moved to amend the zoning code so that the Boring Company could build the elevator, two others stumbled over each other in their rush to second him. It passed 5–0.
           <br></br><br></br>
           No american city has anything even vaguely similar to Musk’s project. That may be partly due to the fact that transit experts say the smartest way to improve public transit is to expand upon existing systems—add more rail lines to existing subways, more buses to existing routes. Even cities building these systems for the first time tend to integrate them with other dominant modes of transit, taking into consideration how people are already moving through the space. The hyperloop, by contrast, is “incompatible with every other mode of transportation,” as Jeff Tumlin, a transit consultant at <Card modalContent="Nelson\Nygaard Consulting Associates is a transportation planning firm. The company develops transportation systems to promote broader community goals of mobility, equality, economic development, and healthy living." extraLink={this.hyperlinkify("http://nelsonnygaard.com/portfolio/&sa=D&ust=1544075782479000&usg=AFQjCNFttpwp3y0frNxfMoxV5u20InF0pw")}>Nelson\Nygaard Consulting Associates</Card>, told me. It would be difficult to link up the tunnel with Metro Center, a subway station in Central L.A., and there are few public-transit modes near the Hawthorne location where the Boring Company is digging. (A Boring Company spokesman told me that many of its tunneling projects will someday hook up to public transit.)
           <br></br><br></br>
