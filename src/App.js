@@ -18,6 +18,7 @@ class App extends Component {
   componentDidMount() { // Issue: all strings within the buttons must be unique
     // Make groups first
     var m = document.getElementsByClassName("Context");
+    console.log(m[0].childNodes[1]);
     var cardSiblings = {};
     var cardDivs = {};
     var cardGroups = {};
