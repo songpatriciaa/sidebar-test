@@ -51,22 +51,9 @@ class App extends Component {
 
       for (var i=0; i<this.state.cardDivs.length; i++) {
         if (ele.target === this.state.cardDivs[i].firstChild) {
-          // for (var j=0; j<this.state.openCards.length; j++) {
-          //   var targetNum = cardOrder[this.state.cardDivs[i].firstChild.firstChild.data];
-          //   var otherNum = cardOrder[this.state.openCards[j].firstChild.firstChild.data];
-          //   if (targetNum > otherNum) { // clicked element is bottom
-              // setTimeout(this.checkCollision(this.state.cardDivs[i].childNodes[1],this.state.openCards[j].childNodes[1],this.state.cardDivs[i].childNodes[1]), 1);
-          //   }
-          //   else {
-          //     setTimeout(this.checkCollision(this.state.openCards[j].childNodes[1],this.state.cardDivs[i].childNodes[1],this.state.cardDivs[i].childNodes[1]), 1);
-          //   }
-          // }
           this.state.openCards.push(this.state.cardDivs[i]);
         }
       }
-      // this.setState({
-      //   openCards: hello
-      // });
 
       for (var i=0; i<this.state.openCards.length; i++) {
         for (var j=0; j<this.state.openCards.length; j++) {
